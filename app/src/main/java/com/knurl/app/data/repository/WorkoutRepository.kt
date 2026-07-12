@@ -39,8 +39,10 @@ class WorkoutRepository(private val database: AppDatabase) {
             val exercise = requireNotNull(database.exerciseDao().getById(programExercise.exerciseId)) {
                 "Missing exercise ${programExercise.exerciseId}"
             }
+            // Falls back to an empty bar if this exercise has never been assigned a working
+            // weight in this program (e.g. a program created outside the normal flow).
             val stored = database.workingWeightDao().get(program.id, programExercise.exerciseId)
-                ?: WorkingWeight(program.id, programExercise.exerciseId, weight = 0.0, failStreak = 0)
+                ?: WorkingWeight(program.id, programExercise.exerciseId, weight = settings.barWeight, failStreak = 0)
             val lastPerformedEpochDate =
                 database.setLogDao().getLastPerformedEpochDate(program.id, programExercise.exerciseId)
 
