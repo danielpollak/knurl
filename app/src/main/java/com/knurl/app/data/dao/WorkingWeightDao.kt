@@ -17,6 +17,9 @@ interface WorkingWeightDao {
     @Query("SELECT * FROM working_weights WHERE programId = :programId")
     fun getAllForProgram(programId: Long): Flow<List<WorkingWeight>>
 
+    @Query("SELECT * FROM working_weights")
+    suspend fun getAllRows(): List<WorkingWeight>
+
     @Upsert
     suspend fun upsert(workingWeight: WorkingWeight)
 

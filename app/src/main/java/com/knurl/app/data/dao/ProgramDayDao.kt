@@ -11,6 +11,9 @@ interface ProgramDayDao {
     @Query("SELECT * FROM program_days WHERE programId = :programId ORDER BY orderIndex ASC")
     fun getByProgram(programId: Long): Flow<List<ProgramDay>>
 
+    @Query("SELECT * FROM program_days")
+    suspend fun getAllRows(): List<ProgramDay>
+
     @Query("SELECT * FROM program_days WHERE id = :id")
     suspend fun getById(id: Long): ProgramDay?
 

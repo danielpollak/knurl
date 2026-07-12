@@ -3,6 +3,7 @@ package com.knurl.app.data.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import androidx.room.Update
 import com.knurl.app.data.entity.SetLog
 import kotlinx.coroutines.flow.Flow
 
@@ -26,4 +27,7 @@ interface SetLogDao {
 
     @Insert
     suspend fun insertAll(setLogs: List<SetLog>): List<Long>
+
+    @Update
+    suspend fun updateAll(setLogs: List<SetLog>)
 }

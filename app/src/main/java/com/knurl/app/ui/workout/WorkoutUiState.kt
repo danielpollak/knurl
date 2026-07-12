@@ -5,6 +5,7 @@ data class WorkoutUiState(
     val hasActiveProgram: Boolean = true,
     val programName: String = "",
     val dayName: String = "",
+    val unitLabel: String = "lb",
     val exercises: List<ExerciseUiState> = emptyList(),
     val restSecondsRemaining: Int? = null,
     val justFinished: Boolean = false

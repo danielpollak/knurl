@@ -11,6 +11,9 @@ interface ProgramExerciseDao {
     @Query("SELECT * FROM program_exercises WHERE programDayId = :programDayId ORDER BY orderIndex ASC")
     fun getByProgramDay(programDayId: Long): Flow<List<ProgramExercise>>
 
+    @Query("SELECT * FROM program_exercises")
+    suspend fun getAllRows(): List<ProgramExercise>
+
     @Insert
     suspend fun insert(programExercise: ProgramExercise): Long
 

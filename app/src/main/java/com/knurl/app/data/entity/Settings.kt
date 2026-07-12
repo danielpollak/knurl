@@ -3,8 +3,10 @@ package com.knurl.app.data.entity
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.knurl.app.data.model.WeightUnit
+import kotlinx.serialization.Serializable
 
 /** Singleton row: there is only ever one Settings record, at [id]. */
+@Serializable
 @Entity(tableName = "settings")
 data class Settings(
     @PrimaryKey val id: Int = SINGLETON_ID,

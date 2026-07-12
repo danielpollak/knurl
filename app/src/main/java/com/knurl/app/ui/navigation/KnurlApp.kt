@@ -21,6 +21,7 @@ import com.knurl.app.ui.history.HistoryScreen
 import com.knurl.app.ui.history.SessionDetailScreen
 import com.knurl.app.ui.programs.ProgramEditorScreen
 import com.knurl.app.ui.programs.ProgramsScreen
+import com.knurl.app.ui.settings.SettingsScreen
 import com.knurl.app.ui.workout.WorkoutScreen
 
 private const val SESSION_DETAIL_ROUTE = "history/{sessionId}"
@@ -76,6 +77,8 @@ fun KnurlApp() {
             }
 
             composable(KnurlDestination.EXERCISES.route) { ExercisesScreen() }
+
+            composable(KnurlDestination.SETTINGS.route) { SettingsScreen() }
         }
     }
 }

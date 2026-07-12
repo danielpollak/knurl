@@ -27,6 +27,7 @@ fun SessionDetailScreen(
     viewModel: SessionDetailViewModel = viewModel(factory = SessionDetailViewModel.factory(sessionId))
 ) {
     val setLogs by viewModel.setLogs.collectAsState()
+    val unitLabel by viewModel.unitLabel.collectAsState()
 
     Scaffold(modifier = modifier) { innerPadding ->
         LazyColumn(
@@ -37,14 +38,14 @@ fun SessionDetailScreen(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(setLogs, key = { it.id }) { setLog ->
-                SetLogRow(setLog)
+                SetLogRow(setLog, unitLabel)
             }
         }
     }
 }
 
 @Composable
-private fun SetLogRow(setLog: SetLog) {
+private fun SetLogRow(setLog: SetLog, unitLabel: String) {
     val successColor = MaterialTheme.colorScheme.primary
     val failureColor = MaterialTheme.colorScheme.error
     Card(modifier = Modifier.fillMaxWidth()) {
@@ -56,7 +57,7 @@ private fun SetLogRow(setLog: SetLog) {
         ) {
             Text(text = "${setLog.exerciseName} — set ${setLog.setNumber}")
             Text(
-                text = "${setLog.repsDone}/${setLog.targetReps} @ ${setLog.weight.toInt()} lb",
+                text = "${setLog.repsDone}/${setLog.targetReps} @ ${setLog.weight.toInt()} $unitLabel",
                 color = if (setLog.success) successColor else failureColor
             )
         }

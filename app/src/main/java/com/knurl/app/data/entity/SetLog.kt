@@ -5,7 +5,9 @@ import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.knurl.app.data.model.MuscleGroup
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(
     tableName = "set_logs",
     foreignKeys = [

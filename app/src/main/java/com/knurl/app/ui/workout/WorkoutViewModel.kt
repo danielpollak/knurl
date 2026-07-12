@@ -40,6 +40,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
                     hasActiveProgram = true,
                     programName = workout.programName,
                     dayName = workout.dayName,
+                    unitLabel = workout.unit.name.lowercase(),
                     exercises = workout.exercises.map { exercise ->
                         ExerciseUiState(
                             exerciseId = exercise.exerciseId,

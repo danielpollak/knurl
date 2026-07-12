@@ -1,6 +1,7 @@
 package com.knurl.app.data.repository
 
 import com.knurl.app.data.model.MuscleGroup
+import com.knurl.app.data.model.WeightUnit
 
 data class WorkoutExerciseUi(
     val programExerciseId: Long,
@@ -21,6 +22,7 @@ data class TodaysWorkout(
     val programDayId: Long,
     val dayName: String,
     val epochDate: Long,
+    val unit: WeightUnit,
     val barWeight: Double,
     val availablePlates: List<Double>,
     val restTimerSeconds: Int,

@@ -3,7 +3,9 @@ package com.knurl.app.data.entity
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(
     tableName = "working_weights",
     primaryKeys = ["programId", "exerciseId"],

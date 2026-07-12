@@ -77,7 +77,11 @@ private fun WorkoutContent(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(uiState.exercises, key = { it.exerciseId }) { exercise ->
-                        ExerciseCard(exercise = exercise, onTapSet = { setIndex -> onTapSet(exercise.exerciseId, setIndex) })
+                        ExerciseCard(
+                            exercise = exercise,
+                            unitLabel = uiState.unitLabel,
+                            onTapSet = { setIndex -> onTapSet(exercise.exerciseId, setIndex) }
+                        )
                     }
                 }
 
@@ -111,7 +115,7 @@ private fun RestTimerBanner(secondsRemaining: Int, onSkip: () -> Unit) {
 }
 
 @Composable
-private fun ExerciseCard(exercise: ExerciseUiState, onTapSet: (setIndex: Int) -> Unit) {
+private fun ExerciseCard(exercise: ExerciseUiState, unitLabel: String, onTapSet: (setIndex: Int) -> Unit) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -119,7 +123,7 @@ private fun ExerciseCard(exercise: ExerciseUiState, onTapSet: (setIndex: Int) ->
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = exercise.name, style = MaterialTheme.typography.titleLarge)
-                Text(text = "${exercise.weight.toInt()} lb", style = MaterialTheme.typography.titleLarge)
+                Text(text = "${exercise.weight.toInt()} $unitLabel", style = MaterialTheme.typography.titleLarge)
             }
             Text(
                 text = plateBreakdownLabel(exercise.plateBreakdown),

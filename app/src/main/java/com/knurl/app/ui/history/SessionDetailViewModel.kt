@@ -10,12 +10,17 @@ import com.knurl.app.data.AppDatabase
 import com.knurl.app.data.entity.SetLog
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 class SessionDetailViewModel(database: AppDatabase, sessionId: Long) : ViewModel() {
 
     val setLogs: StateFlow<List<SetLog>> = database.setLogDao().getBySession(sessionId)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    val unitLabel: StateFlow<String> = database.settingsDao().observe()
+        .map { it?.unit?.name?.lowercase() ?: "lb" }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), "lb")
 
     companion object {
         fun factory(sessionId: Long): ViewModelProvider.Factory = viewModelFactory {

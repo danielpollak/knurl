@@ -75,6 +75,7 @@ class WorkoutRepository(private val database: AppDatabase) {
             programDayId = nextDay.id,
             dayName = nextDay.name,
             epochDate = todayEpochDate,
+            unit = settings.unit,
             barWeight = settings.barWeight,
             availablePlates = settings.availablePlates,
             restTimerSeconds = settings.restTimerSeconds,

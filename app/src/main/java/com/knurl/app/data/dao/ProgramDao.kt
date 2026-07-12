@@ -21,6 +21,9 @@ interface ProgramDao {
     @Insert
     suspend fun insert(program: Program): Long
 
+    @Insert
+    suspend fun insertAll(programs: List<Program>): List<Long>
+
     @Query("UPDATE programs SET isActive = 0")
     suspend fun deactivateAll()
 
