@@ -10,19 +10,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenu
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -148,7 +147,6 @@ private fun DayEditor(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun AddExerciseForm(libraryExercises: List<Exercise>, onAdd: (Exercise, Int, Int, Double) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
@@ -158,18 +156,11 @@ private fun AddExerciseForm(libraryExercises: List<Exercise>, onAdd: (Exercise, 
     var increment by remember { mutableStateOf("5") }
 
     Column(modifier = Modifier.padding(top = 12.dp)) {
-        ExposedDropdownMenuBox(expanded = expanded, onExpandedChange = { expanded = it }) {
-            OutlinedTextField(
-                value = selected?.name ?: "Select exercise",
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Exercise") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .menuAnchor()
-                    .fillMaxWidth()
-            )
-            ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            OutlinedButton(onClick = { expanded = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(selected?.name ?: "Select exercise")
+            }
+            DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                 libraryExercises.forEach { exercise ->
                     DropdownMenuItem(
                         text = { Text(exercise.name) },
