@@ -8,7 +8,7 @@ in the cloud via GitHub Actions — no local Android toolchain required.
 - Kotlin + Jetpack Compose (Material 3)
 - Room for local persistence
 - Coroutines + Flow, MVVM
-- minSdk 26, targetSdk/compileSdk 36
+- minSdk 26, targetSdk/compileSdk 37
 
 ## Installing the debug APK on your phone
 
