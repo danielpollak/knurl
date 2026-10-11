@@ -93,13 +93,13 @@ internal suspend fun seedDatabase(database: AppDatabase) {
     val exerciseIds = exerciseDao.insertAll(SeedData.libraryExercises)
     val exerciseIdByName = SeedData.libraryExercises.map { it.name }.zip(exerciseIds).toMap()
 
-    val programId = programDao.insert(SeedData.strongLiftsProgram())
-    val (dayAId, dayBId) = programDayDao.insertAll(SeedData.strongLiftsDays(programId))
+    val programId = programDao.insert(SeedData.fiveByFiveProgram())
+    val (dayAId, dayBId) = programDayDao.insertAll(SeedData.fiveByFiveDays(programId))
 
     programExerciseDao.insertAll(
-        SeedData.strongLiftsExercises(dayAId, dayBId, exerciseIdByName)
+        SeedData.fiveByFiveExercises(dayAId, dayBId, exerciseIdByName)
     )
     workingWeightDao.upsertAll(
-        SeedData.strongLiftsWorkingWeights(programId, exerciseIdByName)
+        SeedData.fiveByFiveWorkingWeights(programId, exerciseIdByName)
     )
 }

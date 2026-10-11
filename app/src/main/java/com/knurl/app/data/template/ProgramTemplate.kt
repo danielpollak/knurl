@@ -20,8 +20,8 @@ data class ProgramTemplate(val name: String, val type: ProgramType, val days: Li
  */
 object ProgramTemplates {
 
-    val strongLifts5x5 = ProgramTemplate(
-        name = "StrongLifts 5x5",
+    val fiveByFive = ProgramTemplate(
+        name = "5x5",
         type = ProgramType.AB,
         days = listOf(
             TemplateDay(
@@ -105,5 +105,5 @@ object ProgramTemplates {
         )
     )
 
-    val all: List<ProgramTemplate> = listOf(strongLifts5x5, chestBackLegs, pushPullLegs)
+    val all: List<ProgramTemplate> = listOf(fiveByFive, chestBackLegs, pushPullLegs)
 }

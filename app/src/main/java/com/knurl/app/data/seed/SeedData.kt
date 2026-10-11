@@ -19,7 +19,7 @@ object SeedData {
 
     const val STARTING_MAIN_LIFT_WEIGHT_LB = 135.0
 
-    /** Default exercise library covering StrongLifts plus the CBL/PPL templates added in M4. */
+    /** Default exercise library covering the 5x5 program plus the CBL/PPL templates added in M4. */
     val libraryExercises: List<Exercise> = listOf(
         Exercise(name = "Squat", muscleGroup = MuscleGroup.LEGS, isCustom = false),
         Exercise(name = "Bench Press", muscleGroup = MuscleGroup.CHEST, isCustom = false),
@@ -49,19 +49,19 @@ object SeedData {
         availablePlates = listOf(45.0, 35.0, 25.0, 10.0, 5.0, 2.5)
     )
 
-    fun strongLiftsProgram(): Program = Program(
-        name = "StrongLifts 5x5",
+    fun fiveByFiveProgram(): Program = Program(
+        name = "5x5",
         type = ProgramType.AB,
         isActive = true
     )
 
-    fun strongLiftsDays(programId: Long): List<ProgramDay> = listOf(
+    fun fiveByFiveDays(programId: Long): List<ProgramDay> = listOf(
         ProgramDay(programId = programId, name = "Workout A", orderIndex = 0),
         ProgramDay(programId = programId, name = "Workout B", orderIndex = 1)
     )
 
     /** [exerciseIdByName] must contain every name referenced below. */
-    fun strongLiftsExercises(
+    fun fiveByFiveExercises(
         workoutADayId: Long,
         workoutBDayId: Long,
         exerciseIdByName: Map<String, Long>
@@ -122,7 +122,7 @@ object SeedData {
         )
     }
 
-    fun strongLiftsWorkingWeights(
+    fun fiveByFiveWorkingWeights(
         programId: Long,
         exerciseIdByName: Map<String, Long>
     ): List<WorkingWeight> = mainLiftNames.map { name ->
