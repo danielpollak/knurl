@@ -6,6 +6,7 @@ data class WorkoutUiState(
     val programName: String = "",
     val dayName: String = "",
     val unitLabel: String = "lb",
+    val barWeight: Double = 45.0,
     val exercises: List<ExerciseUiState> = emptyList(),
     val restSecondsRemaining: Int? = null,
     val justFinished: Boolean = false

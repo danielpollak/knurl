@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -24,6 +25,9 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +41,7 @@ fun WorkoutScreen(modifier: Modifier = Modifier, viewModel: WorkoutViewModel = v
     WorkoutContent(
         uiState = uiState,
         onTapSet = viewModel::tapSet,
+        onAdjustWeight = viewModel::adjustWeight,
         onSkipRest = viewModel::skipRest,
         onFinishWorkout = viewModel::finishWorkout,
         modifier = modifier
@@ -47,10 +52,22 @@ fun WorkoutScreen(modifier: Modifier = Modifier, viewModel: WorkoutViewModel = v
 private fun WorkoutContent(
     uiState: WorkoutUiState,
     onTapSet: (exerciseId: Long, setIndex: Int) -> Unit,
+    onAdjustWeight: (exerciseId: Long, direction: Int) -> Unit,
     onSkipRest: () -> Unit,
     onFinishWorkout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var weightDialogExerciseId by remember { mutableStateOf<Long?>(null) }
+    uiState.exercises.firstOrNull { it.exerciseId == weightDialogExerciseId }?.let { exercise ->
+        WeightDialog(
+            exercise = exercise,
+            barWeight = uiState.barWeight,
+            unitLabel = uiState.unitLabel,
+            onAdjust = { direction -> onAdjustWeight(exercise.exerciseId, direction) },
+            onDismiss = { weightDialogExerciseId = null }
+        )
+    }
+
     Column(modifier = modifier.fillMaxSize()) {
         if (uiState.restSecondsRemaining != null) {
             RestTimerBanner(secondsRemaining = uiState.restSecondsRemaining, onSkip = onSkipRest)
@@ -80,7 +97,8 @@ private fun WorkoutContent(
                         ExerciseCard(
                             exercise = exercise,
                             unitLabel = uiState.unitLabel,
-                            onTapSet = { setIndex -> onTapSet(exercise.exerciseId, setIndex) }
+                            onTapSet = { setIndex -> onTapSet(exercise.exerciseId, setIndex) },
+                            onWeightClick = { weightDialogExerciseId = exercise.exerciseId }
                         )
                     }
                 }
@@ -115,7 +133,12 @@ private fun RestTimerBanner(secondsRemaining: Int, onSkip: () -> Unit) {
 }
 
 @Composable
-private fun ExerciseCard(exercise: ExerciseUiState, unitLabel: String, onTapSet: (setIndex: Int) -> Unit) {
+private fun ExerciseCard(
+    exercise: ExerciseUiState,
+    unitLabel: String,
+    onTapSet: (setIndex: Int) -> Unit,
+    onWeightClick: () -> Unit
+) {
     Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -123,7 +146,12 @@ private fun ExerciseCard(exercise: ExerciseUiState, unitLabel: String, onTapSet:
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = exercise.name, style = MaterialTheme.typography.titleLarge)
-                Text(text = "${exercise.weight.toInt()} $unitLabel", style = MaterialTheme.typography.titleLarge)
+                Text(
+                    text = "${exercise.weight.toInt()} $unitLabel",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable(onClick = onWeightClick)
+                )
             }
             Text(
                 text = plateBreakdownLabel(exercise.plateBreakdown),
@@ -168,6 +196,44 @@ private fun SetChip(reps: Int?, targetReps: Int, onClick: () -> Unit) {
         Text(text = (reps ?: targetReps).toString(), color = contentColor, textAlign = TextAlign.Center)
     }
 }
+
+@Composable
+private fun WeightDialog(
+    exercise: ExerciseUiState,
+    barWeight: Double,
+    unitLabel: String,
+    onAdjust: (direction: Int) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(exercise.name) },
+        text = {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Button(onClick = { onAdjust(-1) }) { Text("-") }
+                    Text(
+                        text = "${formatWeight(exercise.weight)} $unitLabel",
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                    Button(onClick = { onAdjust(1) }) { Text("+") }
+                }
+                Column(modifier = Modifier.padding(top = 16.dp)) {
+                    Text("Each side:", style = MaterialTheme.typography.titleSmall)
+                    Text("Bar: ${formatWeight(barWeight)} $unitLabel")
+                    exercise.plateBreakdown.groupingBy { it }.eachCount().forEach { (plate, count) ->
+                        Text("$count x ${formatWeight(plate)} $unitLabel")
+                    }
+                    if (exercise.plateBreakdown.isEmpty()) Text("No plates")
+                }
+            }
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Done") } }
+    )
+}
+
+private fun formatWeight(value: Double): String =
+    if (value == value.toLong().toDouble()) value.toLong().toString() else value.toString()
 
 private fun plateBreakdownLabel(plates: List<Double>): String {
     if (plates.isEmpty()) return "Bar only"

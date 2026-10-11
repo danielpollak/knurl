@@ -87,8 +87,13 @@ class WorkoutRepository(private val database: AppDatabase) {
      * Writes the [SetLog]s for [workout], applies progression per exercise, and marks the
      * session complete. [repsPerExercise] maps exerciseId to the reps recorded for each set,
      * in set order; exercises missing from the map are assumed to have hit every target rep.
+     * [weightsPerExercise] overrides the weight actually lifted (defaults to the suggested one).
      */
-    suspend fun finishWorkout(workout: TodaysWorkout, repsPerExercise: Map<Long, List<Int>>) {
+    suspend fun finishWorkout(
+        workout: TodaysWorkout,
+        repsPerExercise: Map<Long, List<Int>>,
+        weightsPerExercise: Map<Long, Double> = emptyMap()
+    ) {
         val sessionId = database.workoutSessionDao().insert(
             WorkoutSession(
                 epochDate = workout.epochDate,
@@ -103,6 +108,7 @@ class WorkoutRepository(private val database: AppDatabase) {
         val newWorkingWeights = mutableListOf<WorkingWeight>()
 
         workout.exercises.forEach { exercise ->
+            val weight = weightsPerExercise[exercise.exerciseId] ?: exercise.startingWeight
             val reps = repsPerExercise[exercise.exerciseId] ?: List(exercise.sets) { exercise.targetReps }
             val succeeded = reps.all { it >= exercise.targetReps }
 
@@ -113,7 +119,7 @@ class WorkoutRepository(private val database: AppDatabase) {
                         exerciseId = exercise.exerciseId,
                         exerciseName = exercise.name,
                         muscleGroup = exercise.muscleGroup,
-                        weight = exercise.startingWeight,
+                        weight = weight,
                         targetReps = exercise.targetReps,
                         setNumber = index + 1,
                         repsDone = repsDone,
@@ -123,7 +129,7 @@ class WorkoutRepository(private val database: AppDatabase) {
             }
 
             val result = Progression.applyResult(
-                startingWeight = WorkingWeightState(exercise.startingWeight, exercise.startingFailStreak),
+                startingWeight = WorkingWeightState(weight, exercise.startingFailStreak),
                 succeeded = succeeded,
                 increment = exercise.increment,
                 barWeight = workout.barWeight,

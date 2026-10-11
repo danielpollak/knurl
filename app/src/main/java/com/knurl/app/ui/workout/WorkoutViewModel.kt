@@ -8,6 +8,8 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.knurl.app.KnurlApplication
 import com.knurl.app.data.repository.TodaysWorkout
 import com.knurl.app.data.repository.WorkoutRepository
+import com.knurl.app.data.model.WeightUnit
+import com.knurl.app.domain.WeightMath
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,6 +43,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
                     programName = workout.programName,
                     dayName = workout.dayName,
                     unitLabel = workout.unit.name.lowercase(),
+                    barWeight = workout.barWeight,
                     exercises = workout.exercises.map { exercise ->
                         ExerciseUiState(
                             exerciseId = exercise.exerciseId,
@@ -77,6 +80,26 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
         startRestTimer()
     }
 
+    /** Adjusts today's weight for one exercise by [direction] steps (+1/-1), never below the bar. */
+    fun adjustWeight(exerciseId: Long, direction: Int) {
+        val workout = currentWorkout ?: return
+        val step = if (workout.unit == WeightUnit.KG) 2.5 else 5.0
+        val state = _uiState.value
+        _uiState.value = state.copy(
+            exercises = state.exercises.map { exercise ->
+                if (exercise.exerciseId != exerciseId) {
+                    exercise
+                } else {
+                    val newWeight = (exercise.weight + direction * step).coerceAtLeast(workout.barWeight)
+                    exercise.copy(
+                        weight = newWeight,
+                        plateBreakdown = WeightMath.perSidePlates(newWeight, workout.barWeight, workout.availablePlates)
+                    )
+                }
+            }
+        )
+    }
+
     fun skipRest() {
         restTimerJob?.cancel()
         _uiState.value = _uiState.value.copy(restSecondsRemaining = null)
@@ -86,8 +109,9 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
         val workout = currentWorkout ?: return
         restTimerJob?.cancel()
         val repsByExercise = _uiState.value.exercises.associate { it.exerciseId to it.repsPerSet.map { reps -> reps ?: 0 } }
+        val weightsByExercise = _uiState.value.exercises.associate { it.exerciseId to it.weight }
         viewModelScope.launch {
-            repository.finishWorkout(workout, repsByExercise)
+            repository.finishWorkout(workout, repsByExercise, weightsByExercise)
             load()
             _uiState.value = _uiState.value.copy(justFinished = true)
         }
