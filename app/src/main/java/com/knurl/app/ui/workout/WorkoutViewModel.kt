@@ -24,6 +24,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
 
     private var currentWorkout: TodaysWorkout? = null
     private var restTimerJob: Job? = null
+    private var selectedDayId: Long? = null
 
     init {
         load()
@@ -32,7 +33,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     fun load() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, justFinished = false)
-            val workout = repository.loadTodaysWorkout()
+            val workout = repository.loadTodaysWorkout(selectedDayId)
             currentWorkout = workout
             _uiState.value = if (workout == null) {
                 WorkoutUiState(isLoading = false, hasActiveProgram = false)
@@ -42,6 +43,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
                     hasActiveProgram = true,
                     programName = workout.programName,
                     dayName = workout.dayName,
+                    availableDays = workout.availableDays,
                     unitLabel = workout.unit.name.lowercase(),
                     barWeight = workout.barWeight,
                     exercises = workout.exercises.map { exercise ->
@@ -100,6 +102,13 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
         )
     }
 
+    /** Switches today's session to another day of the active program, discarding unsaved taps. */
+    fun selectDay(dayId: Long) {
+        restTimerJob?.cancel()
+        selectedDayId = dayId
+        load()
+    }
+
     fun skipRest() {
         restTimerJob?.cancel()
         _uiState.value = _uiState.value.copy(restSecondsRemaining = null)
@@ -112,6 +121,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
         val weightsByExercise = _uiState.value.exercises.associate { it.exerciseId to it.weight }
         viewModelScope.launch {
             repository.finishWorkout(workout, repsByExercise, weightsByExercise)
+            selectedDayId = null
             load()
             _uiState.value = _uiState.value.copy(justFinished = true)
         }

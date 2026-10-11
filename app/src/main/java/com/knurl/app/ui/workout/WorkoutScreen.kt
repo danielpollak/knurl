@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
@@ -42,6 +43,7 @@ fun WorkoutScreen(modifier: Modifier = Modifier, viewModel: WorkoutViewModel = v
         uiState = uiState,
         onTapSet = viewModel::tapSet,
         onAdjustWeight = viewModel::adjustWeight,
+        onSelectDay = viewModel::selectDay,
         onSkipRest = viewModel::skipRest,
         onFinishWorkout = viewModel::finishWorkout,
         modifier = modifier
@@ -53,10 +55,35 @@ private fun WorkoutContent(
     uiState: WorkoutUiState,
     onTapSet: (exerciseId: Long, setIndex: Int) -> Unit,
     onAdjustWeight: (exerciseId: Long, direction: Int) -> Unit,
+    onSelectDay: (dayId: Long) -> Unit,
     onSkipRest: () -> Unit,
     onFinishWorkout: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showDayPicker by remember { mutableStateOf(false) }
+    if (showDayPicker) {
+        AlertDialog(
+            onDismissRequest = { showDayPicker = false },
+            title = { Text("Choose workout") },
+            text = {
+                Column {
+                    uiState.availableDays.forEach { day ->
+                        TextButton(
+                            onClick = {
+                                showDayPicker = false
+                                if (day.name != uiState.dayName) onSelectDay(day.id)
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(day.name, style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
+                }
+            },
+            confirmButton = { TextButton(onClick = { showDayPicker = false }) { Text("Cancel") } }
+        )
+    }
+
     var weightDialogExerciseId by remember { mutableStateOf<Long?>(null) }
     uiState.exercises.firstOrNull { it.exerciseId == weightDialogExerciseId }?.let { exercise ->
         WeightDialog(
@@ -84,7 +111,12 @@ private fun WorkoutContent(
 
             else -> Column(modifier = Modifier.fillMaxSize()) {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
-                    Text(text = uiState.dayName, style = MaterialTheme.typography.headlineSmall)
+                    Text(
+                        text = uiState.dayName + if (uiState.availableDays.size > 1) " \u25BE" else "",
+                        style = MaterialTheme.typography.headlineSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.clickable(enabled = uiState.availableDays.size > 1) { showDayPicker = true }
+                    )
                     Text(text = uiState.programName, style = MaterialTheme.typography.bodyMedium)
                 }
 
@@ -146,12 +178,18 @@ private fun ExerciseCard(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = exercise.name, style = MaterialTheme.typography.titleLarge)
-                Text(
-                    text = "${exercise.weight.toInt()} $unitLabel",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable(onClick = onWeightClick)
-                )
+                Surface(
+                    onClick = onWeightClick,
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Text(
+                        text = "${exercise.weight.toInt()} $unitLabel",
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp)
+                    )
+                }
             }
             Text(
                 text = plateBreakdownLabel(exercise.plateBreakdown),

@@ -18,14 +18,14 @@ class WorkoutRepository(private val database: AppDatabase) {
      * rule (per exercise) as a display-only adjustment -- nothing is persisted until
      * [finishWorkout] is called, so reopening this screen repeatedly is idempotent.
      */
-    suspend fun loadTodaysWorkout(): TodaysWorkout? {
+    suspend fun loadTodaysWorkout(overrideDayId: Long? = null): TodaysWorkout? {
         val program = database.programDao().getActive().first() ?: return null
         val days = database.programDayDao().getByProgram(program.id).first()
         if (days.isEmpty()) return null
 
         val lastSession = database.workoutSessionDao().getLastCompletedForProgram(program.id)
         val lastDayIndex = lastSession?.let { session -> days.indexOfFirst { it.id == session.programDayId } }
-        val nextDay = if (lastDayIndex == null || lastDayIndex == -1) {
+        val nextDay = days.firstOrNull { it.id == overrideDayId } ?: if (lastDayIndex == null || lastDayIndex == -1) {
             days.first()
         } else {
             days[(lastDayIndex + 1) % days.size]
@@ -74,6 +74,7 @@ class WorkoutRepository(private val database: AppDatabase) {
             programName = program.name,
             programDayId = nextDay.id,
             dayName = nextDay.name,
+            availableDays = days.map { DayOption(it.id, it.name) },
             epochDate = todayEpochDate,
             unit = settings.unit,
             barWeight = settings.barWeight,

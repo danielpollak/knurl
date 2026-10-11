@@ -1,10 +1,13 @@
 package com.knurl.app.ui.workout
 
+import com.knurl.app.data.repository.DayOption
+
 data class WorkoutUiState(
     val isLoading: Boolean = true,
     val hasActiveProgram: Boolean = true,
     val programName: String = "",
     val dayName: String = "",
+    val availableDays: List<DayOption> = emptyList(),
     val unitLabel: String = "lb",
     val barWeight: Double = 45.0,
     val exercises: List<ExerciseUiState> = emptyList(),

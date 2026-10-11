@@ -16,11 +16,14 @@ data class WorkoutExerciseUi(
     val plateBreakdown: List<Double>
 )
 
+data class DayOption(val id: Long, val name: String)
+
 data class TodaysWorkout(
     val programId: Long,
     val programName: String,
     val programDayId: Long,
     val dayName: String,
+    val availableDays: List<DayOption>,
     val epochDate: Long,
     val unit: WeightUnit,
     val barWeight: Double,
