@@ -17,5 +17,6 @@ data class ExerciseUiState(
     val targetReps: Int,
     val weight: Double,
     val plateBreakdown: List<Double>,
-    val repsPerSet: List<Int>
+    /** Reps recorded per set; null means the set has not been tapped yet. */
+    val repsPerSet: List<Int?>
 )

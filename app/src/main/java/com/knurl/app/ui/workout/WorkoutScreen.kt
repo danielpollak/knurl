@@ -146,17 +146,16 @@ private fun ExerciseCard(exercise: ExerciseUiState, unitLabel: String, onTapSet:
 }
 
 @Composable
-private fun SetChip(reps: Int, targetReps: Int, onClick: () -> Unit) {
-    val success = reps >= targetReps
-    val backgroundColor = if (success) {
-        MaterialTheme.colorScheme.primary
+private fun SetChip(reps: Int?, targetReps: Int, onClick: () -> Unit) {
+    val backgroundColor = if (reps == null) {
+        MaterialTheme.colorScheme.surface
     } else {
-        MaterialTheme.colorScheme.errorContainer
+        MaterialTheme.colorScheme.error
     }
-    val contentColor = if (success) {
-        MaterialTheme.colorScheme.onPrimary
+    val contentColor = if (reps == null) {
+        MaterialTheme.colorScheme.onSurface
     } else {
-        MaterialTheme.colorScheme.onErrorContainer
+        MaterialTheme.colorScheme.onError
     }
     Box(
         modifier = Modifier
@@ -166,7 +165,7 @@ private fun SetChip(reps: Int, targetReps: Int, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Text(text = reps.toString(), color = contentColor, textAlign = TextAlign.Center)
+        Text(text = (reps ?: targetReps).toString(), color = contentColor, textAlign = TextAlign.Center)
     }
 }
 

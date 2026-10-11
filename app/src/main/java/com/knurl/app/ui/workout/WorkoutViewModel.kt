@@ -48,7 +48,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
                             targetReps = exercise.targetReps,
                             weight = exercise.startingWeight,
                             plateBreakdown = exercise.plateBreakdown,
-                            repsPerSet = List(exercise.sets) { exercise.targetReps }
+                            repsPerSet = List<Int?>(exercise.sets) { null }
                         )
                     }
                 )
@@ -56,7 +56,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
         }
     }
 
-    /** Cycles the tapped set's recorded reps from target down to 0, wrapping back to target. */
+    /** Cycles a set: untouched -> target reps -> down to 0 -> untouched. */
     fun tapSet(exerciseId: Long, setIndex: Int) {
         val state = _uiState.value
         val updatedExercises = state.exercises.map { exercise ->
@@ -65,7 +65,11 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
             } else {
                 val updatedReps = exercise.repsPerSet.toMutableList()
                 val current = updatedReps[setIndex]
-                updatedReps[setIndex] = if (current <= 0) exercise.targetReps else current - 1
+                updatedReps[setIndex] = when {
+                    current == null -> exercise.targetReps
+                    current <= 0 -> null
+                    else -> current - 1
+                }
                 exercise.copy(repsPerSet = updatedReps)
             }
         }
@@ -81,7 +85,7 @@ class WorkoutViewModel(private val repository: WorkoutRepository) : ViewModel() 
     fun finishWorkout() {
         val workout = currentWorkout ?: return
         restTimerJob?.cancel()
-        val repsByExercise = _uiState.value.exercises.associate { it.exerciseId to it.repsPerSet }
+        val repsByExercise = _uiState.value.exercises.associate { it.exerciseId to it.repsPerSet.map { reps -> reps ?: 0 } }
         viewModelScope.launch {
             repository.finishWorkout(workout, repsByExercise)
             load()
